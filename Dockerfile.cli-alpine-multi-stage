@@ -1,0 +1,21 @@
+FROM node:alpine AS build-env
+
+ADD . /app
+WORKDIR /app/wetty
+
+RUN apk update
+RUN apk --no-cache add g++ gcc libgcc libstdc++ linux-headers make python bash
+RUN npm install
+
+FROM node:alpine
+
+RUN apk update && apk add ca-certificates && rm -rf /var/cache/apk/*
+
+WORKDIR /app/wetty
+
+COPY --from=build-env /app /app
+
+EXPOSE 3000
+
+ENTRYPOINT ["node"]
+CMD ["app.js", "-p", "3000"]
